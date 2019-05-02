@@ -1,6 +1,6 @@
 # Building real-time applications with iOS, GraphQL & AWS AppSync
 
-In this workshop we'll learn how to build cloud-enabled native iOS apps with Swift & [AWS Amplify](https://aws-amplify.github.io/).
+In this workshop we'll learn how to build cloud-enabled native iOS Swift apps with [AWS Amplify](https://aws-amplify.github.io/).
 
 ![](https://imgur.com/IPnnJyf.jpg)
 
@@ -12,25 +12,14 @@ In this workshop we'll learn how to build cloud-enabled native iOS apps with Swi
 - [Creating & working with multiple serverless environments](https://github.com/dennisAWS/aws-appsync-ios-workshop#multiple-serverless-environments)
 - [Deleting the resources](https://github.com/dennisAWS/aws-appsync-ios-workshop#removing-services)
 
-## Redeeming the AWS Credit   
-
-1. Visit the [AWS Console](https://console.aws.amazon.com/console).
-2. In the top right corner, click on __My Account__.
-![](dashboard1.jpg)
-3. In the left menu, click __Credits__.
-![](dashboard2.jpg)
 
 ## Getting Started - Create an Xcode project
 
-To get started, we first need to create a new Xcode project & change into the new directory.
+To get started, create a new Xcode project & save as: `ios-amplify-app`
 
-Launch Xcode and create a new iOS project and save as ios-amplify-app
+From Terminal, change into the new app directory & install the Amplify CLI.
 
-Now change into the new app directory & install the Amplify CLI:
-
-## Installing the CLI & Initializing a new AWS Amplify Project
-
-### Installing the CLI
+### Install the Amplify CLI
 
 Next, we'll install the AWS Amplify CLI:
 
@@ -38,7 +27,9 @@ Next, we'll install the AWS Amplify CLI:
 npm install -g @aws-amplify/cli
 ```
 
-Now we need to configure the CLI with our credentials:
+After installation, configure the CLI with your developer credentials:
+
+Note: If you already have the AWS CLI installed and use a named profile, you can skip the `amplify configure` step.
 
 ```js
 amplify configure
@@ -55,8 +46,8 @@ Here we'll walk through the `amplify configure` setup. Once you've signed in to 
 ? secretAccessKey:  __(<YOUR_SECRET_ACCESS_KEY>)__
 - Profile Name: __amplify-workshop-user__
 
-### Initializing A New Project
-
+### Initializing A New Amplify Project
+From the root of your Xcode project folder:
 ```bash
 amplify init
 ```
@@ -68,44 +59,13 @@ amplify init
 - Do you want to use an AWS profile? __Y__
 - Please choose the profile you want to use: __amplify-workshop-user__
 
-Now, the AWS Amplify CLI has iniatilized a new project & you will see a new folder: __amplify__ & a new file called `awsconfiguration.json` in the root directory. These files holds your project configuration.
+AWS Amplify CLI will iniatilize a new project & you will see a new folder: __amplify__ & a new file called `awsconfiguration.json` in the root directory. These files holds your Amplify project configuration.
 
 To view the status of the amplify project at any time, you can run the Amplify `status` command:
 
 ```sh
 amplify status
 ```
-
-### Configuring the iOS applicaion
-
-Now, our resources are created & we can start using them!
-
-To configure the app, we'll use Cocoapods to install the AWS SDK for iOS and AWS AppSync dependancies.
-In the root project folder, run the following command to initialize Cocoapods.
-
-```js
-pod init
-```
-
-This will create a `Podfile`. Open up the `Podfile` and add the following dependancies:
-
-```js
-target 'ios-amplify-app' do
-  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for ios-amplify-app
-  pod 'AWSAppSync', ' ~> 2.10.0'
-  
-end
-```
-
-Install the AppSync iOS SDK by running:
-```js
-pod install --repo-update
-```
-
-Now, our iOS app is ready to start using our AWS services.
 
 ## Adding a GraphQL API
 
@@ -125,7 +85,7 @@ Answer the following questions
 - What best describes your project: __Single object with fields (e.g. “Todo” with ID, name, description)__   
 - Do you want to edit the schema now? (Y/n) __Y__   
 
-> When prompted, update the schema to the following:   
+When prompted, update the schema to the following:   
 
 ```graphql
 type Talk @model {
@@ -138,7 +98,7 @@ type Talk @model {
 }
 ```
 
-> Next, let's deploy the API into our account:
+Next, let's deploy the GraphQL API into our account:
 
 ```bash
 amplify push
@@ -158,7 +118,7 @@ In the AWS AppSync console, open your API & then click on Queries.
 
 Execute the following mutation to create a new talk in the API:
 
-```graphql
+```bash
 mutation createTalk {
   createTalk(input: {
     name: "Monetize your Mobile Apps"
@@ -178,7 +138,7 @@ mutation createTalk {
 
 Now, let's query for the talk:
 
-```graphql
+```bash
 query listTalks {
   listTalks {
     items {
@@ -194,7 +154,7 @@ query listTalks {
 
 We can even add search / filter capabilities when querying:
 
-```graphql
+```bash
 query listTalks {
   listTalks(filter: {
     description: {
@@ -212,29 +172,54 @@ query listTalks {
 }
 ```
 
-### Add the AWSConfiguration.json file to your Xcode project
+### Configuring the iOS applicaion - AppSync iOS Client SDK
 
-We need to configure our iOS Swift application to be aware of our new AWS Amplify project. We do this by referencing the auto-generated `awsconfiguration.json` file that is now in root of our Xcode project folder.
+Our backend resources have been created and we just verified mutations and queries in the AppSync Console. Let's move onto the mobile client!
 
-Launch Xcode 
+To configure the app, we'll use [Cocoapods](https://cocoapods.org/) to install the AWS SDK for iOS and AWS AppSync Client dependencies.
+In the root project folder, run the following command to initialize Cocoapods.
+
 ```js
-open ios-amplify-app.xcworkspace/
+pod init
 ```
 
-In the Finder, drag `awsconfiguration.json` into Xcode under the top Project Navigator folder. When the Options dialog box that appears, do the following:
+This will create a new `Podfile`. Open up the `Podfile` in your favorite editor and add the following dependency for adding the AWSAppSync SDK to your app:
+
+```swift
+target 'ios-amplify-app' do
+  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for ios-amplify-app
+  pod 'AWSAppSync', ' ~> 2.10.0'
+  
+end
+```
+
+Install the AppSync iOS SDK by running:
+```js
+pod install --repo-update
+```
+
+## Add the `awsconfiguration.json` and `API.swift` files to your Xcode project
+
+We need to configure our iOS Swift application to be aware of our new AWS Amplify project. We do this by referencing the auto-generated `awsconfiguration.json` and `API.Swift` files in the root of your Xcode project folder.
+
+Launch Xcode using the .xcworkspace from now on as we are using Cocoapods.
+```js
+$ open ios-amplify-app.xcworkspace/
+```
+
+In Xcode, right-click on the project folder and choose `"Add Files to ..."` and add the `awsconfiguration.json` and the `API.Swift` files to your project. When the Options dialog box that appears, do the following:
 
 * Clear the Copy items if needed check box.
 * Choose Create groups, and then choose Next.
 
-### Interacting with the GraphQL API from our client application - Querying for data
+Build the project (Command-B) to make sure we don't have any compile errors.
 
-Now that the GraphQL API is created we can begin interacting with it!
-
-The first thing we'll do is perform a query to fetch data from our API.
-
-To do so, we need to define the query and execute the query.
-
-#### Integrate AppSync into your iOS app (part 1) - `AppDelegate.swift`
+## Integrate AppSync iOS Client into your app
+#### Update AppDelegate.swift
+Add the folowing three numbered code snippets to your `AppDelegate.swift` class:
 
 ```swift
 import UIKit
@@ -249,7 +234,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        // BEGIN #3 AppSync
+        // BEGIN #3 AppSync cliet when using Authorization Type: API key
         do {
             // Directory in which AppSync stores its persistent cache databases
             let cacheConfiguration = try AWSAppSyncCacheConfiguration()
@@ -270,9 +255,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
-#### Integrate into your app (part 2) - `ViewController.swift`
+#### Update ViewController.swift
 
-Add the following three items to your ViewController
+Add the following three items to your `ViewController.swift` class:
 ```swift
 import UIKit
 import AWSAppSync // #1
@@ -292,124 +277,125 @@ class ViewController: UIViewController {
 }
 ```
 
-## Performing Mutations
+## Add GraphQL Mutation
 
-Now, let's look at how we can create mutations in Swift.
-
-Add the following function in `ViewController.swift`:
+Add the following mutation function to your `ViewController.swift` class:
 
 ```swift
-    // GraphQL Mutation - Add a new talk
-    func createTalkMutation(){
-        let conferenceInput = CreateTalkInput(name: "Monetize your iOS app", description: "How to make dough as an iOS developer", speakerName: "Steve Jobs", speakerBio: "I do cool stuff at Apple")
-        appSyncClient?.perform(mutation: CreateTalkMutation(input: conferenceInput))
-        { (result, error) in
-            if let error = error as? AWSAppSyncClientError {
-                print("Error occurred: \(error.localizedDescription )")
-            }
-            if let resultError = result?.errors {
-                print("Error saving conf talk: \(resultError)")
-                return
-            }
-            
-            guard let result = result?.data else { return }
-            
-            print("Talk created: \(String(describing: result.createTalk?.id))")
+// GraphQL Mutation - Add a new talk
+func createTalkMutation(){
+    let conferenceInput = CreateTalkInput(name: "Monetize your iOS app", description: "How to make dough as an iOS developer", speakerName: "Steve Jobs", speakerBio: "I do cool stuff at Apple")
+    appSyncClient?.perform(mutation: CreateTalkMutation(input: conferenceInput))
+    { (result, error) in
+        if let error = error as? AWSAppSyncClientError {
+            print("Error occurred: \(error.localizedDescription )")
         }
+        if let resultError = result?.errors {
+            print("Error saving conf talk: \(resultError)")
+            return
+        }
+        
+        guard let result = result?.data else { return }
+        
+        print("Talk created: \(String(describing: result.createTalk?.id))")
     }
+}
 ```
 
-## Performing Queries
+## Add GraphQL Query
 
-Next, we'll perform a query to fetch data from our API with a new function in `ViewController.swift`.
+Add the following query function to your `ViewController.swift` class:
 
 ```swift
 // GraphQL Query - List all talks
-    func getTalksQuery(){
-        appSyncClient?.fetch(query: ListTalksQuery(), cachePolicy: .returnCacheDataAndFetch) { (result, error) in
-            if error != nil {
-                print(error?.localizedDescription ?? "")
-                return
-            }
-            
-            guard let talks = result?.data?.listTalks?.items else { return }
-            talks.forEach{ print(("Title: " + ($0?.name)!) + "\nSpeaker: " + (($0?.speakerName)! + "\n")) }
+func getTalksQuery(){
+    appSyncClient?.fetch(query: ListTalksQuery(), cachePolicy: .returnCacheDataAndFetch) { (result, error) in
+        if error != nil {
+            print(error?.localizedDescription ?? "")
+            return
         }
+        
+        guard let talks = result?.data?.listTalks?.items else { return }
+        talks.forEach{ print(("Title: " + ($0?.name)!) + "\nSpeaker: " + (($0?.speakerName)! + "\n")) }
     }
+}
 ```
 
-### Run App and take a quick break
+### Run App and Invoke Mutation and Query Functions
 
-In order te execute the mutation and query functions above, we'll need to call these functions from ViewDidLoad() as shown:
+In order to execute the mutation and/or query functions above, we can invoke those functions from `ViewDidLoad()` in the `ViewController.swift` class:
 ```swift
 override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        //...
+    super.viewDidLoad()
+    
+    //...
 
-        createTalkMutation()
-        getTalksQuery()
-      
-        //...
-    }
+    createTalkMutation()
+    getTalksQuery()
+
+    //...
+}
 ```
+Build (Command-B) and run your app.
 
-### GraphQL Subscriptions
+### Add GraphQL Subscriptions
 
-Next, let's see how we can create a subscription to subscribe to data changes in our API.
-
-To do so, we need to define the subscription, listen for the subscription, & update the the UI (or log it) whenever new data comes in through the subscription.
+GraphQL subscriptions give us the real-time updates when data changes in our API. 
+First, set the discard variable at the `ViewController.swift` class level:
 
 ```swift
 // Set a discard variable at the class level
 var discard: Cancellable?
 ```
 
-Now add this subscribe function to your `ViewController.swift` file: 
+Now add this new `subscribeToTalks()` function to your `ViewController.swift` class: 
 
 ```swift
 func subscribeToTalks() {
-        do {
-            discard = try appSyncClient?.subscribe(subscription: OnCreateTalkSubscription(), resultHandler: { (result, transaction, error) in
-                if let result = result {
-                    print("Subscription triggered! " + result.data!.onCreateTalk!.name + " " + result.data!.onCreateTalk!.speakerName)
-                } else if let error = error {
-                    print(error.localizedDescription)
-                }
-            })
-        } catch {
-            print("Error starting subscription.")
-        }
+    do {
+        discard = try appSyncClient?.subscribe(subscription: OnCreateTalkSubscription(), resultHandler: { (result, transaction, error) in
+            if let result = result {
+                print("Subscription triggered! " + result.data!.onCreateTalk!.name + " " + result.data!.onCreateTalk!.speakerName)
+            } else if let error = error {
+                print(error.localizedDescription)
+            }
+        })
+    } catch {
+        print("Error starting subscription.")
     }
+}
 ```
 
-Finally, call the `subscribeToTalks()` function from the ViewDidLoad():
+Finally, call the `subscribeToTalks()` from `ViewDidLoad()` in your `ViewController.swift` class:
+
 ```swift
 override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // ...
-        
-        // subscription to newly created talks
-        subscribeToTalks()
-    }
+    super.viewDidLoad()
+    
+    // ...
+    
+    // invoke to subscribe to newly created talks
+    subscribeToTalks()
+}
 ```
+> Don't forget to comment out the calls to createTalkMutation() getTalksQuery() in the ViewDidLoad() or the app will create a new talk each time it loads.
 
-Let's run the app and then add a new talk via the AppSync Console and we should see the iOS app log the new talk via real-tine subscription!
+Run the mobile app and it'll then subscribe to any new talk creation. To test the real-time subscription: Leave the app running and then create a new talk via the AppSync Console through a Mutation and you should see the iOS app log the new talk via a subscription!
 
-## Adding Authentication
+## Adding Authentication to Your iOS App
+#### Add Cognito User Pools (Basic Auth)
 
-To add authentication, we can use the following command:
+Up to this point, we used API key as authorization to calling our GraphQL API. This is good for testing but we need to add authentication to provide controlled (secure) access to our AppSync GraphQL API. Back at the project folder in Terminal, let's add authentication to our project via the Amplify CLI.
 
 ```sh
 amplify add auth
 ```
 
-- __Do you want to use default authentication and security configuration?__, choose __Default configuration__   
+- Do you want to use default authentication and security configuration? __Default configuration__   
 - How do you want users to be able to sign in when using your Cognito User Pool? __Username__   
 - What attributes are required for signing up? __Email__ (keep default)
 
-Now, we'll run the push command and the cloud resources will be created in our AWS account.
+Now run the `amplify push` command and the cloud resources will be created in your AWS account.
 
 ```bash
 amplify push
@@ -417,31 +403,31 @@ amplify push
 
 > To view the new Cognito authentication service at any time after its creation, go to the dashboard at [https://console.aws.amazon.com/cognito/](https://console.aws.amazon.com/cognito/). Also be sure that your region is set correctly.
 
-### Update Podfile to use Auth from AWS SDK
+### Configure iOS App - AWS Auth iOS SDK
 
-Open up the Podfile and add the following dependancies:
-```js
+Open up your Podfile and add the following dependencies:
+```swift
 target 'ios-amplify-app' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
   # Pods for ios-amplify-app
-  pod 'AWSAppSync', ' ~> 2.10.0'  # Already added previously
-  pod 'AWSMobileClient', '~> 2.9.0'      # Required dependency
-  pod 'AWSAuthUI', '~> 2.9.0'            # Optional dependency required to use drop-in UI
-  pod 'AWSUserPoolsSignIn', '~> 2.9.0'   # Optional dependency required to use drop-in UI
+  pod 'AWSAppSync', ' ~> 2.10.0'         # Added previously
+  pod 'AWSMobileClient', '~> 2.9.0'      # Required dependency for auth
+  pod 'AWSAuthUI', '~> 2.9.0'            # Optional for drop-in UI
+  pod 'AWSUserPoolsSignIn', '~> 2.9.0'   # Optional for drop-in UI
 end
 ```
 
-Now run a Pod install:
+Now run a Pod install to add the new dependencies for auth:
 
 ```bash
 pod install
 ```
 
-### Using the AWSMobileClient
-
-To add authentication to our iOS app, we'll go into __AppDelegate.swift__ and first import the `AWSMobileClient`:
+### Add the AWSMobileClient
+AWSMobileClient itself is a credentials provider now and will be used for all authentication needs from federating logins to issuing AWS credentials via Cognito Identity.
+To add AWSMobileClient to our iOS app, we'll go into __ViewController.swift__ and first import the `AWSMobileClient`:
 
 ```swift
 import AWSMobileClient
@@ -471,7 +457,7 @@ AWSMobileClient.sharedInstance().initialize { (userState, error) in
 }
 ```
 
-Last, we'll add the iOS SDK drop-in UI code in the `ViewController.swift` file to show our login UI if the user is not authenticated:
+Last, we'll add the iOS SDK drop-in UI code in the `ViewController.swift` class to show our login UI if the user is not authenticated:
 
 ```swift
 // Use the iOS SDK Auth UI to show login options to user (Basic auth, Google, or Facebook)
@@ -487,17 +473,24 @@ func showSignIn() {
 }
 ```
 
-IMPORTANT: The drop-in UI requires the use of a navigation controller to anchor the view controller. Please make sure the app has an active navigation controller which is passed to the navigationController parameter.
+>IMPORTANT: The drop-in UI requires the use of a navigation controller to anchor the view controller. Please make sure the app has an active navigation controller which is passed to the navigationController parameter. To add a Navigation Controller, select the Main.storyboard, select the yellow button at the top bar of the View Controller UI, then select 'Editor > Embed In > Navigation Controller.
 
-Now, we can run the app and see the Auth Drop in UI in action. This drop in UI provides a built-in UI giving users the ability to sign up & sign in via Amazon Cognito User Pools.
+Now, we can run the app and see the Auth Drop in UI in action. This drop in UI provides a built-in UI giving users the ability to sign up, and sign in via Amazon Cognito User Pools.
 
-> To view the new user that was created in Cognito, go back to the dashboard at [https://console.aws.amazon.com/cognito/](https://console.aws.amazon.com/cognito/). Also be sure that your region is set correctly.
+You now have authentication setup in your app! Go ahead and build (Command-B) and run the app. Based on the sample code above, the first time you launch the app, you should see the UI prompt for username, email, and password. Feel free to create an account and test it out. You'll know if you have successfully logged in when the log shows successful and you'll see the default white screen.
 
-## Adding Authorization to the GraphQL API
+Congratulations! You can now authenticate users.
 
-Next we need to update the AppSync API to now use the newly created Cognito Authentication service as the authentication type. Remember, we previously setup authorization via an API Key for testing.
+## Update AppSync iOS SDK Client
+Now that we have our user authenticating via Cognito User Pools, we need to update the AppSync client configuarion in our iOS app.
 
-To do so, we'll reconfigure the existing GraphQL API:
+
+
+## Update Authorization Type for GraphQL API
+
+Next, we need to update the AppSync API to use Cognito User Pools as the authorization type. Remember, we previously setup authorization via an API key for testing purposes.
+
+To switch our GraphQL API from API key to Cognito User Pools, we'll reconfigure the existing GraphQL API using the Amplify CLI by running this command from our Xcode project folder:
 
 ```sh
 amplify configure api
@@ -505,21 +498,56 @@ amplify configure api
 Please select from one of the below mentioned services: __GraphQL__   
 Choose an authorization type for the API: __Amazon Cognito User Pool__
 
-Next, we'll run `amplify push`:
+Next, run `amplify push` to build out the new resources:
 
 ```sh
 amplify push
 ```
 
-Now, we can only access the API with a logged in user.
+Once deployed, the AppSync GraphQL API can only be accessed via an authenticated User Pool user.
 
-#### Advanced Use Case for Authenticated Users
+## Update the AppSync iOS Client for User Pools
+Now that we are using User Pools authorization for our GraphQL API, we need to modify the AppSync client configuration.
 
-Next, let's look at how to use the identity of the user to associate items created in the database with the logged in user & then query the database using these credentials.
+REPLACE the existing `initializeAppSync()` function in the `ViewController` class with the following AppSync client configuration for User Pools authorization:
 
-To do so, we'll store the user's identity in the database table as userId & add a new index on the table to query for this user ID.
+```swift
+// Use this AppSync client configuration when using Authorization Type: User Pools
+func initializeAppSync() {
+  do {
+      // You can choose the directory in which AppSync stores its persistent cache databases
+      let cacheConfiguration = try AWSAppSyncCacheConfiguration()
 
-#### Adding an index to the table
+      // Initialize the AWS AppSync configuration
+      let appSyncConfig = try AWSAppSyncClientConfiguration(appSyncServiceConfig: AWSAppSyncServiceConfig(),
+        userPoolsAuthProvider: {
+          class MyCognitoUserPoolsAuthProvider : AWSCognitoUserPoolsAuthProviderAsync {
+              func getLatestAuthToken(_ callback: @escaping (String?, Error?) -> Void) {
+                  AWSMobileClient.sharedInstance().getTokens { (tokens, error) in
+                      if error != nil {
+                          callback(nil, error)
+                      } else {
+                          callback(tokens?.idToken?.tokenString, nil)
+                      }
+                  }
+              }
+          }
+          return MyCognitoUserPoolsAuthProvider()
+          }(), cacheConfiguration: cacheConfiguration)
+
+      // Initialize the AWS AppSync client
+      appSyncClient = try AWSAppSyncClient(appSyncConfig: appSyncConfig)
+  } catch {
+      print("Error initializing appsync client. \(error)")
+  }
+}
+```
+
+## Advanced Use Case for Authenticated Users
+
+Next, let's look at how to use the identity of the user to associate items created in the database with the logged in user & then query the database using these credentials. We'll store the user's identity in the database table as userId & add a new index on the DynamoDB table to optimize our query by userId.
+
+### Adding a New Index to the DynamoDB Table
 
 Next, we'll want to add a new GSI (global secondary index) in the table. We do this so we can query on the index to gain new data access pattern.
 
@@ -531,13 +559,16 @@ For the __partition key__, input `userId` to create a `userId-index` Index name 
 
 Next, we'll update the resolver for adding talks & querying for talks.
 
-#### Updating the resolvers
+### Updating the AppSync Resolvers for Handling Auth Users
+To start passing in the userId into newly crated talks, we need to create two new request templates (resolvers) to handling the passing of the userId when adding new talks and used to retrieve talks only created by the UserId.
 
-In the folder __amplify/backend/api/ConferenceAPI/resolvers__, create the following two resolvers:
+In your Xcode project folder __amplify/backend/api/ConferenceAPI/resolvers__, create the following two NEW resolvers:
 
-__Mutation.createTalk.req.vtl__ & __Query.listTalks.req.vtl__.
+- __Mutation.createTalk.req.vtl__
 
-__Mutation.createTalk.req.vtl__
+- __Query.listTalks.req.vtl__
+
+Here's the __Mutation.createTalk.req.vtl__ code:
 
 ```vtl
 $util.qr($context.args.input.put("createdAt", $util.time.nowISO8601()))
@@ -561,7 +592,7 @@ $util.qr($context.args.input.put("userId", $ctx.identity.sub))
 }
 ```
 
-__Query.listTalks.req.vtl__
+Here's the __Query.listTalks.req.vtl__ code:
 
 ```vtl
 {
@@ -577,17 +608,20 @@ __Query.listTalks.req.vtl__
 }
 ```
 
-Next, run the push command again to update the API:
+Next, run the `amplify push` command to update the GraphQL API:
 
 ```sh
 amplify push
 ```
 
-> Now that we've added authorization to the API, the users will need to log in (via username/password) if we would like to perform queries in the AppSync Console. To log in, find the `aws_user_pools_web_client_id` in the `AWSConfiguration.json` file & log in using your `username` & `password`.
+> Now that we've added authentication via Cognito User Pools to the GraphQL API, the users will need to log into the app (via basic auth) in order to perform mutations or queries. 
 
-Now when we create new talks, the `userId` field will be populated with the `userId` of the authenticated (logged in) user.
+### Testing the New Authentication in the AppSync Console
+For testing in the query feature of the AppSync Console, we'll need to authenticate a User Pool user via the `Login with User Pools` button in the queries section. The auth form requires a Client Id and basic auth credentials. You can find the App client Id `_clientWeb` under `App clients` of your User Pools settings in the [Cognito User Pools Console](https://console.aws.amazon.com/cognito/users). In the AppSync Console Query section, select and paste in the `_clientWeb` value into the ClienId field and then type your User Pool `username` & `password` you created previously. If successfully logged in, you can now test mutations and queries directly from the AppSync Console!
 
-When we query for the talks, we will only receive the talk data for the items that were created by the authenticated user.
+From now on, when new talks are created, the `userId` field will be populated with the `userId` of the authenticated (logged in) user.
+
+When we query for talks in the Console or mobile app, we will only receive the talk data for the items that were created by the authenticated user.
 
 ```graphql
 query listTalks {
@@ -603,281 +637,17 @@ query listTalks {
 }
 ```
 
-#### Creating custom resolvers
+## Multiple Amplify Project Environments
 
-Now let's say we want to define & use a custom GraphQL operation & create corresponding resolvers that do not yet exist? We can also do that using Amplify & the local environment.
-
-Let's create a query & resolvers that will query for __all__ talks in the API, similar to the functionality we had before changing the `listTalks` resolver.
-
-To do so, we need to do three things:
-
-1. Define the operations we'd like to have available in our schema (add queries, mutations, subscriptions to __schema.graphql__).
-
-To do so, update __amplify/backend/api/ConferenceAPI/schema.graphql__ to the following:
-
-```graphql
-type Talk @model {
-  id: ID!
-  clientId: ID
-  name: String!
-  description: String!
-  speakerName: String!
-  speakerBio: String!
-}
-
-type ModelTalkConnection {
-  items: [Talk]
-  nextToken: String
-}
-
-type Query {
-  listAllTalks(limit: Int, nextToken: String): ModelTalkConnection
-}
-```
-
-2. Create the request & response mapping templates in __amplify/backend/api/ConferenceAPI/resolvers__.
-
-__Query.listAllTalks.req.vtl__
-
-```vtl
-{
-    "version" : "2017-02-28",
-    "operation" : "Scan",
-    "limit": $util.defaultIfNull(${ctx.args.limit}, 20),
-    "nextToken": $util.toJson($util.defaultIfNullOrBlank($ctx.args.nextToken, null))
-}
-```
-
-__Query.listAllTalks.res.vtl__
-
-```vtl
-{
-    "items": $util.toJson($ctx.result.items),
-    "nextToken": $util.toJson($util.defaultIfNullOrBlank($context.result.nextToken, null))
-}
-```
-
-3. Update __amplify/backend/api/ConferenceAPI/stacks/CustomResources.json__ with the definition of the custom resource.
-
-Update the `Resources` field in __CustomResources.json__ to the following:
-
-```json
-{
-  ...rest of template,
-  "Resources": {
-    "QueryListAllTalksResolver": {
-      "Type": "AWS::AppSync::Resolver",
-      "Properties": {
-        "ApiId": {
-          "Ref": "AppSyncApiId"
-        },
-        "DataSourceName": "TalkTable",
-        "TypeName": "Query",
-        "FieldName": "listAllTalks",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Sub": [
-            "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listAllTalks.req.vtl",
-            {
-              "S3DeploymentBucket": {
-                "Ref": "S3DeploymentBucket"
-              },
-              "S3DeploymentRootKey": {
-                "Ref": "S3DeploymentRootKey"
-              }
-            }
-          ]
-        },
-        "ResponseMappingTemplateS3Location": {
-          "Fn::Sub": [
-            "s3://${S3DeploymentBucket}/${S3DeploymentRootKey}/resolvers/Query.listAllTalks.res.vtl",
-            {
-              "S3DeploymentBucket": {
-                "Ref": "S3DeploymentBucket"
-              },
-              "S3DeploymentRootKey": {
-                "Ref": "S3DeploymentRootKey"
-              }
-            }
-          ]
-        }
-      }
-    }
-  },
-  ...rest of template,
-}
-```
-
-Now that everything has been updated, run the push command again:
-
-```sh
-amplify push
-```
-
-## Multiple Serverless Environments
-
-Now that we have our API up & running, what if we wanted to update our API but wanted to test it out without it affecting our existing version?
+Now that we have our GraphQL API up & running with authentication, what if we wanted to update our API to test it out without it affecting our existing envrionment?
 
 To do so, we can create a clone of our existing environment, test it out, & then deploy & test the new resources.
 
 Once we are happy with the new feature, we can then merge it back into our main environment. Let's see how to do this!
 
-### Creating a new environment
+## Removing Categories from Amplify Project
 
-To create a new environment, we can run the `env` command:
-
-```sh
-amplify env add
-
-> Do you want to use an existing environment? No
-> Enter a name for the environment: apiupdate
-> Do you want to use an AWS profile? Yes
-> Please choose the profile you want to use: appsync-workshop-profile
-```
-
-Now, the new environment has been initialize, & we can deploy the new environment using the `push` command:
-
-```sh
-amplify push
-```
-
-Now that the new environment has been created we can get a list of all available environments using the CLI:
-
-```sh
-amplify env list
-```
-
-Let's update the GraphQL schema to add a new field. In __amplify/backend/api/ConferenceAPI/schema.graphql__  update the schema to the following:
-
-```graphql
-type Talk @model {
-  id: ID!
-  clientId: ID
-  name: String!
-  description: String!
-  speakerName: String!
-  speakerBio: String!
-  type: String
-}
-
-type ModelTalkConnection {
-  items: [Talk]
-  nextToken: String
-}
-
-type Query {
-  listAllTalks(limit: Int, nextToken: String): ModelTalkConnection
-}
-```
-
-In the schema we added a new field to the __Talk__ definition to define the type of talk:
-
-```graphql
-type: String
-```
-
-Now, we can run amplify push again to update the API:
-
-```sh
-amplify push
-```
-
-To test this out, we can go into the [AppSync Console](https://console.aws.amazon.com/appsync) & log into the API.
-
-You should now see a new API called __ConferenceAPI-apiupdate__. Click on this API to view the API dashboard.
-
-If you click on __Schema__ you should notice that it has been created with the new __type__ field. Let's try it out.
-
-To test it out we need to create a new user because we are using a brand new authentication service. To do this, open the app & sign up.
-
-In the API dashboard, click on __Queries__.
-
-Next, click on the __Login with User Pools__ link.
-
-Copy the __aws_user_pools_web_client_id__ value from your __AWSConfiguration.json__ file & paste it into the __ClientId__ field.
-
-Next, login using your __username__ & __password__.
-
-Now, create a new mutation & then query for it:
-
-```graphql
-mutation createTalk {
-  createTalk(input: {
-    name: "Swift is Awesome"
-    description: "Deep dive into mobile development"
-    speakerName: "Swifty"
-    speakerBio: "I fly with Apple"
-    type: "Swift"
-  }) {
-    id name description speakerName speakerBio
-  }
-}
-
-query listAllTalks {
-  listAllTalks {
-    items {
-      name
-      description
-      speakerName
-      speakerBio
-      type
-    }
-  }
-}
-```
-### Merging the new environment changes into the main environment.
-
-Now that we've created a new environment & tested it out, let's check out the main environment.
-
-```sh
-amplify env checkout local
-```
-
-Next, run the `status` command:
-
-```sh
-amplify status
-```
-
-You should now see an __Update__ operation:
-
-```
-Current Environment: local
-
-| Category | Resource name   | Operation | Provider plugin   |
-| -------- | --------------- | --------- | ----------------- |
-| Api      | ConferenceAPI   | Update    | awscloudformation |
-| Auth     | cognito75a8ccb4 | No Change | awscloudformation |
-```
-
-To deploy the changes, run the push command:
-
-```sh
-amplify push
-```
-
-Now, the changes have been deployed & we can delete the `apiupdate` environment:
-
-```sh
-amplify env remove apiupdate
-
-Do you also want to remove all the resources of the environment from the cloud? Y
-```
-
-Now, we should be able to run the `list` command & see only our main environment:
-
-```sh
-amplify env list
-```
-
-## Deleting entire project
-
-```sh
-amplify delete
-```
-
-## Removing Services
-
-If at any time, or at the end of this workshop, you would like to delete a service from your project & your account, you can do this by running the `amplify remove` command:
+If at any time, or at the end of this workshop, you would like to delete a category from your project & your account, you can do this by running the `amplify remove` command:
 
 ```sh
 amplify remove auth
@@ -892,3 +662,9 @@ amplify status
 ```
 
 `amplify status` will give you the list of resources that are currently enabled in your app.
+
+## Deleting the Amplify Project
+
+```sh
+amplify delete
+```
