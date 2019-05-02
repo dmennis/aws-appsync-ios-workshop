@@ -217,63 +217,45 @@ In Xcode, right-click on the project folder and choose `"Add Files to ..."` and 
 
 Build the project (Command-B) to make sure we don't have any compile errors.
 
-## Integrate AppSync iOS Client into your app
-#### Update AppDelegate.swift
-Add the folowing three numbered code snippets to your `AppDelegate.swift` class:
-
-```swift
-import UIKit
-import AWSAppSync // #1
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    var window: UIWindow?
-    
-    var appSyncClient: AWSAppSyncClient? // #2
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        // BEGIN #3 AppSync cliet when using Authorization Type: API key
-        do {
-            // Directory in which AppSync stores its persistent cache databases
-            let cacheConfiguration = try AWSAppSyncCacheConfiguration()
-            
-            // AppSync configuration & client initialization
-            let appSyncServiceConfig = try AWSAppSyncServiceConfig()
-            let appSyncConfig = try AWSAppSyncClientConfiguration(appSyncServiceConfig: appSyncServiceConfig, cacheConfiguration: cacheConfiguration)
-                appSyncClient = try AWSAppSyncClient(appSyncConfig: appSyncConfig)
-        } catch {
-            print("Error initializing appsync client. \(error)")
-        }
-        // END #3 AppSync
-        
-        return true
-    }
-
-    //...
-}
-```
-
+## Initialize the AppSync iOS Client
 #### Update ViewController.swift
+Add the folowing four numbered code snippets to your `ViewController.swift` class:
 
-Add the following three items to your `ViewController.swift` class:
 ```swift
-import UIKit
 import AWSAppSync // #1
 
 class ViewController: UIViewController {
-
+    
     // Reference AppSync client
     var appSyncClient: AWSAppSyncClient? // #2
+    
+    //...
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // #3
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                appSyncClient = appDelegate.appSyncClient
+        //...
+
+        initializeAppSync() // #3
+        
+        //...
     }
+
+    // #4
+    // Use this code when setting up AppSync with API_key auth mode. This mode is used for testing our GraphQL mutations, queries, and subscriptions with an API key.
+    func initializeAppSync() {
+        do {
+        // Initialize the AWS AppSync configuration
+        let appSyncConfig = try AWSAppSyncClientConfiguration(appSyncServiceConfig: AWSAppSyncServiceConfig(),
+        cacheConfiguration: AWSAppSyncCacheConfiguration())
+        
+        // Initialize the AWS AppSync client
+        appSyncClient = try AWSAppSyncClient(appSyncConfig: appSyncConfig)
+        } catch {
+        print("Error initializing appsync client. \(error)")
+        }
+    }
+    // End #4
 }
 ```
 
