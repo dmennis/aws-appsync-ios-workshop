@@ -1,4 +1,4 @@
-# Building real-time applications with iOS, GraphQL, & AWS AppSync
+# Building real-time applications with iOS, GraphQL & AWS AppSync
 
 In this workshop we'll learn how to build cloud-enabled native iOS Swift apps with [AWS Amplify](https://aws-amplify.github.io/) and connect our apps to a GraphQL API via AWS AppSync.
 
