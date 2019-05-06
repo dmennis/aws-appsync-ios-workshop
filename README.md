@@ -1,25 +1,25 @@
-# Building real-time applications with iOS, GraphQL & AWS AppSync
+# Building real-time applications with iOS, GraphQL, & AWS AppSync
 
-In this workshop we'll learn how to build cloud-enabled native iOS Swift apps with [AWS Amplify](https://aws-amplify.github.io/).
+In this workshop we'll learn how to build cloud-enabled native iOS Swift apps with [AWS Amplify](https://aws-amplify.github.io/) and connect our apps to a GraphQL API via AWS AppSync.
 
-![](https://imgur.com/IPnnJyf.jpg)
+We'll start from a new Xcode project, add categories such as `API` and `Auth` using the Amplify Framework to provision cloud resources such as a hosted GraphQL API via AWS AppSync, Amazon DynamoDB as a data source, or an Identity Provider via Amazon Cognito to provide basic authentication. We'll start simple and work our way up to a fully connected mobile app. Please provide any feedback you have in the 'issues' and I'll take a look. Let's get started!
+
+![](./amplify-swift-logo-cli.png)
 
 ### Topics we'll be covering:
 
 - [GraphQL API with AWS AppSync](https://github.com/dennisAWS/aws-appsync-ios-workshop#getting-started---create-an-xcode-project)
 - [Authentication](https://github.com/dennisAWS/aws-appsync-ios-workshop#adding-authentication)
-- [Adding Authorization to the AWS AppSync API](https://github.com/dennisAWS/aws-appsync-ios-workshop#adding-authorization-to-the-graphql-api)
-- [Creating & working with multiple serverless environments](https://github.com/dennisAWS/aws-appsync-ios-workshop#multiple-serverless-environments)
+- [Adding Authorization to your GraphQL API using AWS AppSync API](https://github.com/dennisAWS/aws-appsync-ios-workshop#adding-authorization-to-the-graphql-api)
 - [Deleting the resources](https://github.com/dennisAWS/aws-appsync-ios-workshop#removing-services)
-
 
 ## Getting Started - Create an Xcode project
 
-To get started, create a new Xcode project & save as: `ios-amplify-app`
+To get started, create a new Xcode project for iOS Swift & save as: `ios-amplify-app`
 
-From Terminal, change into the new app directory & install the Amplify CLI.
+From a Mac Terminal, change into the new app directory & prepare to install and congigure the Amplify CLI.
 
-### Install the Amplify CLI
+### Install and Configure the Amplify CLI - Just Once
 
 Next, we'll install the AWS Amplify CLI:
 
@@ -30,6 +30,7 @@ npm install -g @aws-amplify/cli
 After installation, configure the CLI with your developer credentials:
 
 Note: If you already have the AWS CLI installed and use a named profile, you can skip the `amplify configure` step.
+`Amplify configure` is going to have you launch the AWS Management Console, create a new IAM User, asign an IAM Policy, and collect the programmatic credentials to craate a CLI profile that will be used to provision AWS resources for each project in future steps.
 
 ```js
 amplify configure
@@ -59,7 +60,7 @@ amplify init
 - Do you want to use an AWS profile? __Y__
 - Please choose the profile you want to use: __amplify-workshop-user__
 
-AWS Amplify CLI will iniatilize a new project & you will see a new folder: __amplify__ & a new file called `awsconfiguration.json` in the root directory. These files holds your Amplify project configuration.
+AWS Amplify CLI will iniatilize a new project & you'll see a new folder: __amplify__ & a new file called `awsconfiguration.json` in the root directory. These files hold your Amplify project configuration.
 
 To view the status of the amplify project at any time, you can run the Amplify `status` command:
 
@@ -68,14 +69,14 @@ amplify status
 ```
 
 ## Adding a GraphQL API
-
+In this section we'll add a new GraphQL API via AWS AppSync to our iOS project backend. 
 To add a GraphQL API, we can use the following command:
 
 ```sh
 amplify add api
 ```
 
-Answer the following questions
+Answer the following questions:
 
 - Please select from one of the above mentioned services __GraphQL__   
 - Provide API name: __ConferenceAPI__   
@@ -85,7 +86,7 @@ Answer the following questions
 - What best describes your project: __Single object with fields (e.g. “Todo” with ID, name, description)__   
 - Do you want to edit the schema now? (Y/n) __Y__   
 
-When prompted, update the schema to the following:   
+When prompted and the default schema launches in your favorite editor, update the default schema to the following:   
 
 ```graphql
 type Talk @model {
@@ -99,7 +100,7 @@ type Talk @model {
 ```
 
 Next, let's deploy the GraphQL API into our account:
-
+This step take the local CloudFormation templates and deployes them to the AWS Cloud for provisioning of the services you enabled via the `add API` category.
 ```bash
 amplify push
 ```
@@ -618,14 +619,6 @@ query listTalks {
   }
 }
 ```
-
-## Multiple Amplify Project Environments
-
-Now that we have our GraphQL API up & running with authentication, what if we wanted to update our API to test it out without it affecting our existing envrionment?
-
-To do so, we can create a clone of our existing environment, test it out, & then deploy & test the new resources.
-
-Once we are happy with the new feature, we can then merge it back into our main environment. Let's see how to do this!
 
 ## Removing Categories from Amplify Project
 
